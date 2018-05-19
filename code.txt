@@ -1,0 +1,121 @@
+Public Class Form1
+    Dim board(2, 2) As Integer
+    Dim turn As Integer
+    Dim xWin As Integer
+    Dim oWin As Integer
+    Dim ties As Integer
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Button1.Visible = False
+        drawBoard()
+        For i = 0 To 2
+            For j = 0 To 2
+                board(i, j) = 0
+            Next
+        Next
+    End Sub
+    Private Sub Form1_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
+        Dim xPos As Integer
+        Dim yPos As Integer
+        If e.Button = MouseButtons.Left Then
+            xPos = e.X
+            yPos = e.Y
+            If xPos >= 100 And xPos <= 400 And yPos >= 100 And yPos <= 400 Then
+                Dim row As Integer = (xPos \ 100) - 1
+                Dim col As Integer = (yPos \ 100) - 1
+                If board(row, col) > 0 And turn = 0 Then
+                    MsgBox("The game is over, please play a new game or close the program.")
+                ElseIf board(row, col) > 0 Then
+                    MsgBox("There is already a piece there, please try another spot.")
+                Else
+                    drawPiece(row, col, turn)
+                    turn = turn + 1
+                End If
+            End If
+                checkWin()
+            End If
+    End Sub
+    Public Sub checkWin()
+        Dim graph As System.Drawing.Graphics
+        graph = Me.CreateGraphics
+        Dim x As Integer
+        Dim temp As String
+        Dim winH, winV, diag1, diag2 As Boolean
+        Do
+            winH = False
+            winV = False
+            diag1 = False
+            diag2 = False
+            If board(x, 0) = board(x, 1) And board(x, 1) = board(x, 2) And board(x, 0) > 0 Then winV = True
+            If board(0, x) = board(1, x) And board(1, x) = board(2, x) And board(0, x) > 0 Then winH = True
+            If board(0, 0) = board(1, 1) And board(1, 1) = board(2, 2) And board(0, 0) > 0 Then diag1 = True
+            If board(2, 0) = board(1, 1) And board(1, 1) = board(0, 2) And board(2, 0) > 0 Then diag2 = True
+            x+=1
+        Loop Until x = 3 Or winH = True Or winV = True
+        If turn Mod 2 = 1 Then temp = "X" Else temp = "O"
+        If winH = True Then
+            graph.DrawLine(Pens.Green, 100, ((100 * (x - 1)) + 150), 400, ((100 * (x - 1)) + 150))
+            Button1.Visible = True
+            MsgBox(temp & " won!  Do you want to play again?  Click button on the left")
+            accum(temp)
+            turn = 0
+        ElseIf winV = True Then
+            graph.DrawLine(Pens.Green, ((100 * (x - 1)) + 150), 100, ((100 * (x - 1)) + 150), 400)
+            Button1.Visible = True
+            MsgBox(temp & " won!  Do you want to play again?  Click button on the left")
+            accum(temp)
+            turn = 0
+        ElseIf diag1 = True Then
+            graph.DrawLine(Pens.Green, 100, 100, 400, 400)
+            Button1.Visible = True
+            MsgBox(temp & " won!  Do you want to play again?  Click button on the left")
+            accum(temp)
+            turn = 0
+        ElseIf diag2 = True Then
+            graph.DrawLine(Pens.Green, 400, 100, 100, 400)
+            Button1.Visible = True
+            MsgBox(temp & " won!  Do you want to play again?  Click button on the left")
+            accum(temp)
+            turn = 0
+        ElseIf turn = 9 Then
+            Button1.Visible = True
+            MsgBox("It's a tie game!  Do you want to play again?  Click button on the left")
+            accum("tie")
+            turn = 0
+        End If
+
+    End Sub
+    Private Sub accum(temp As String)
+        If temp = "X" Then
+            xWin += 1
+            Label1.Text = "X Wins: " & xWin
+        ElseIf temp = "O" Then
+            oWin += 1
+            Label2.Text = "O Wins: " & oWin
+        ElseIf temp = "tie" Then
+            ties += 1
+            Label3.Text = "Ties: " & ties
+        End If
+    End Sub
+    Public Sub drawPiece(row As Integer, col As Integer, turn As Integer)
+        Dim graph As System.Drawing.Graphics
+        graph = Me.CreateGraphics
+        If turn Mod 2 = 0 Then
+            graph.DrawLine(Pens.Blue, (100 * row) + 100, (100 * col) + 100, (100 * row) + 200, (100 * col) + 200)
+            graph.DrawLine(Pens.Blue, (100 * row) + 100, (100 * col) + 200, (100 * row) + 200, (100 * col) + 100)
+            board(row, col) = 1
+        Else
+            graph.DrawEllipse(Pens.Red, (100 * row) + 100, (100 * col) + 100, 100, 100)
+            board(row, col) = 2
+        End If
+    End Sub
+    Public Sub drawBoard()
+        Dim graph As System.Drawing.Graphics
+        graph = Me.CreateGraphics
+        graph.FillRectangle(Brushes.White, 100, 100, 300, 300)
+        graph.DrawRectangle(Pens.Black, 100, 100, 300, 300) 'optional border
+        graph.DrawLine(Pens.Black, 200, 100, 200, 400) 'vertical line 1
+        graph.DrawLine(Pens.Black, 300, 100, 300, 400) 'vertical line 2
+        graph.DrawLine(Pens.Black, 100, 200, 400, 200) 'horizontal line 1
+        graph.DrawLine(Pens.Black, 100, 300, 400, 300) 'horizontal line 2
+    End Sub
+End Class
